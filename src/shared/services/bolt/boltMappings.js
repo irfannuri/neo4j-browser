@@ -117,7 +117,7 @@ export function extractNodesAndRelationshipsFromRecordsForOldVis (records, types
     rawRels = [...rawRels, ...records[0].get(keys[1])]
   } else {
     records.forEach((record) => {
-      let graphItems = keys.map((key) => record.get(key))
+      let graphItems = flattenGraphItems(keys.map((key) => record.get(key)))
       rawNodes = [...rawNodes, ...graphItems.filter((item) => item instanceof types.Node)]
       rawRels = [...rawRels, ...graphItems.filter((item) => item instanceof types.Relationship)]
       let paths = graphItems.filter((item) => item instanceof types.Path)
@@ -135,6 +135,10 @@ export function extractNodesAndRelationshipsFromRecordsForOldVis (records, types
     return {id: item.identity.toString(), startNodeId: item.start.toString(), endNodeId: item.end.toString(), type: item.type, properties: itemIntToString(item.properties, intChecker, intConverter)}
   })
   return { nodes: nodes, relationships: relationships }
+}
+
+const flattenGraphItems = (graphItems) => {
+  return graphItems.reduce((acc, graphItem) => Array.isArray(graphItem) ? acc = acc.concat(flattenGraphItems(graphItem)) : acc.push(graphItem) && acc, [])
 }
 
 const extractNodesAndRelationshipsFromPath = (item, rawNodes, rawRels) => {
